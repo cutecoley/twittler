@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href = "twittler.css"> </link>
     <script src="jquery.js"></script>
+    <script src="moment.js"></script>
     <script src="data_generator.js"></script>
+
   </head>
   <body>
     <script>
@@ -10,17 +13,61 @@
       $(document).ready(function(){
         var $body = $('body');
         $body.html('');
+        var $tweets = $('<div></div>').addClass("padded-width");
+        //var $profile = $('<div></div>');
+        //var $picture = $('<div></div>').addClass("picture");
+        //var $userName = $('<div></div>').addClass("userName");
+        var lastRefresh = null;
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
+        $tweets.prependTo($body);
+        //$picture.appendTo($profile);
+        //$userName.appendTo($profile);
+        //$profile.appendTo($body);
+
+        function userTimeline(clicked_user){
+              $tweets.fadeOut('slow');
+              $tweets.html("").fadeIn('slow')
+              streams.home.filter(function(tweet,key){
+                return clicked_user === tweet.user;
+              }).forEach(function(userTweet, index){
+                displayTweet(userTweet);
+              });
         }
 
+        function displayTweet(tweet)
+        {
+              var $tweet = $('<div></div>').addClass("tweet");
+              var $header = $('<div></div>');
+              var $message = $('<div></div>');
+              var $user = $('<div></div>');
+              var $created_at = $('<div></div>');
+              var $userName = $('<div></div>');
+              $userName.text(tweet.user).addClass("header-bold-user").addClass("user-created").appendTo($header);
+              $message.addClass("message").text(tweet.message);
+              $user.text('  @' + tweet.user).addClass("header-user").addClass("user-created").click(function(){
+                userTimeline(tweet.user);
+                clearInterval(intervalVar);
+              }).appendTo($header);
+              $created_at.text(moment(tweet.created_at).fromNow()).addClass("header-date ").addClass("user-created").appendTo($header);
+              $header.appendTo($tweet);
+              $message.appendTo($tweet);
+              $tweet.prependTo($tweets);
+        }
+
+        function getTweets(){
+              $tweets.html("")
+              streams.home.forEach(function(getTweet,index){
+                  displayTweet(getTweet)
+              });
+        };
+
+        getTweets();
+
+        var intervalVar = setInterval(function(){
+              getTweets();
+        }, 5000);
       });
+
 
     </script>
   </body>
